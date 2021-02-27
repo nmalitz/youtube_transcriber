@@ -18,6 +18,19 @@ def my_hook(d):
 
 
 def download_youtube_as_mp3(url):
+    ydl_opts = get_ydl_opts()
+    with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+        ydl.download([url])
+
+        info_dict = ydl.extract_info(url, download=False)
+        video_title = info_dict.get('title', None)
+        video_title = video_title.replace(":", "-")
+        video_title = video_title.replace("**", "_")
+        video_id = info_dict.get("id", None)
+        return video_title, video_id
+
+
+def get_ydl_opts():
     ydl_opts = {
         'format': 'bestaudio/best',
         # 'outtmpl': './audio_output/%(title)s.%(ext)s',
@@ -29,15 +42,7 @@ def download_youtube_as_mp3(url):
         }],
         'progress_hooks': [my_hook],
     }
-    with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-        ydl.download([url])
-
-        info_dict = ydl.extract_info(url, download=False)
-        video_title = info_dict.get('title', None)
-        video_title = video_title.replace(":", "-")
-        video_title = video_title.replace("**", "_")
-        video_id = info_dict.get("id", None)
-        return video_title, video_id
+    return ydl_opts
 
 
 def make_transcript(title, vid_id):
