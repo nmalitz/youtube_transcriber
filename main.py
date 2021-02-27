@@ -8,8 +8,9 @@ import speech_recognition as sr
 
 def main():
     url = "https://www.youtube.com/watch?v=Sm3Wye6uKXQ&t=23s"
-    response, vid_id = download_youtube_as_mp3(url)
-    make_transcript(response, vid_id)
+    download_youtube_as_wav(url)
+    vid_title, vid_id = get_vid_attributes(url)
+    make_transcript(vid_title, vid_id)
 
 
 def my_hook(d):
@@ -17,17 +18,10 @@ def my_hook(d):
         print('Done downloading, now converting ...')
 
 
-def download_youtube_as_mp3(url):
+def download_youtube_as_wav(url):
     ydl_opts = get_ydl_opts()
     with youtube_dl.YoutubeDL(ydl_opts) as ydl:
         ydl.download([url])
-
-        info_dict = ydl.extract_info(url, download=False)
-        video_title = info_dict.get('title', None)
-        video_title = video_title.replace(":", "-")
-        video_title = video_title.replace("**", "_")
-        video_id = info_dict.get("id", None)
-        return video_title, video_id
 
 
 def get_ydl_opts():
@@ -43,6 +37,19 @@ def get_ydl_opts():
         'progress_hooks': [my_hook],
     }
     return ydl_opts
+
+
+def get_vid_attributes(url):
+    ydl_opts = get_ydl_opts()
+    with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+        info_dict = ydl.extract_info(url, download=False)
+
+    video_title = info_dict.get('title', None)
+    # video_title = video_title.replace(":", "-")
+    # video_title = video_title.replace("**", "_")
+    video_id = info_dict.get("id", None)
+
+    return video_title, video_id
 
 
 def make_transcript(title, vid_id):
